@@ -1,0 +1,52 @@
+name: Validate Hanging Media V1
+
+on:
+  push:
+    branches:
+      - agent/hanging-media-studio-v1
+  workflow_dispatch:
+
+jobs:
+  build-and-browser-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Production build
+        run: npm run build
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Start production preview
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/hanging-media-vite.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/hanging-media-vite.log
+          exit 1
+
+      - name: Browser runtime verification
+        run: npm run verify:browser
+
+      - name: Upload validation artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hanging-media-studio-v1-validation
+          path: |
+            dist
+            artifacts
+          if-no-files-found: error
