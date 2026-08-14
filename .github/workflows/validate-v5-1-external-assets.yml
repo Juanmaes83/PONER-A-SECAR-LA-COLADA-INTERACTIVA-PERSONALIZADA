@@ -36,10 +36,10 @@ jobs:
           done
           cat /tmp/v5-1-external.log
           exit 1
-      - name: Existing V5.1 browser regression QA
-        run: node scripts/visual-check-v5-1.mjs
       - name: External package browser QA
         run: node scripts/visual-check-v5-1-external.mjs
+      - name: Existing V5.1 browser regression QA
+        run: node scripts/visual-check-v5-1.mjs
       - name: Upload QA evidence
         uses: actions/upload-artifact@v4
         if: always()
