@@ -24,6 +24,7 @@ jobs:
           node --check src/v5-1-external-assets.js
           node --check src/v5-1-character-library.js
           node --check scripts/visual-check-v5-1.mjs
+          node --check scripts/visual-check-v5-1-external.mjs
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Start preview
@@ -37,3 +38,12 @@ jobs:
           exit 1
       - name: Existing V5.1 browser regression QA
         run: node scripts/visual-check-v5-1.mjs
+      - name: External package browser QA
+        run: node scripts/visual-check-v5-1-external.mjs
+      - name: Upload QA evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v5-1-external-assets-qa
+          path: artifacts
+          if-no-files-found: warn
