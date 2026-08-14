@@ -1,91 +1,16 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#c9beb0" />
-  <title>Hanging Media Studio</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-</head>
-<body>
-  <main id="app">
-    <section id="stage-shell" aria-label="Interactive hanging media preview">
-      <canvas id="stage"></canvas>
-      <div id="loading" class="loading is-hidden">Preparing media…</div>
-      <div class="stage-badge">HANGING MEDIA / LIVE PREVIEW</div>
-      <div class="stage-hint">Drag to slide · grab a sheet to deform · wheel to move</div>
-    </section>
-
-    <aside id="authoring-panel" aria-label="Hanging media controls">
-      <header class="panel-header">
-        <div>
-          <p class="eyebrow">LIVE COMPONENT</p>
-          <h1>Hanging Media Studio</h1>
-        </div>
-        <button id="reset-all" class="icon-button" type="button" title="Reset">↺</button>
-      </header>
-
-      <section class="control-section">
-        <h2>Content</h2>
-        <div id="media-slots" class="media-slots"></div>
-        <label class="upload-button" for="media-upload">+ Add images or video</label>
-        <input id="media-upload" type="file" accept="image/*,video/*" multiple hidden />
-      </section>
-
-      <section class="control-section">
-        <h2>Carousel</h2>
-        <label>Photos in view <output data-out="inView"></output><input data-control="inView" type="range" min="1" max="6" step="1" /></label>
-        <label>Photo gap <output data-out="gap"></output><input data-control="gap" type="range" min="0.25" max="1.8" step="0.01" /></label>
-        <label>Auto drift <output data-out="autoDrift"></output><input data-control="autoDrift" type="range" min="0" max="0.08" step="0.001" /></label>
-        <label>Scroll response <output data-out="scrollResponse"></output><input data-control="scrollResponse" type="range" min="0.1" max="1.6" step="0.01" /></label>
-        <label>Glide <output data-out="glide"></output><input data-control="glide" type="range" min="0.02" max="0.35" step="0.01" /></label>
-        <label>Slide sway <output data-out="slideSway"></output><input data-control="slideSway" type="range" min="0" max="1" step="0.01" /></label>
-        <label>Wall parallax <output data-out="parallax"></output><input data-control="parallax" type="range" min="0" max="0.2" step="0.005" /></label>
-        <label class="toggle-row"><span>Drag to slide</span><input data-control="dragToSlide" type="checkbox" /></label>
-      </section>
-
-      <section class="control-section">
-        <h2>Fabric</h2>
-        <label>Clips per photo <select data-control="clips"><option>2</option><option>3</option></select></label>
-        <label>Stiffness <output data-out="stiffness"></output><input data-control="stiffness" type="range" min="0.45" max="1" step="0.01" /></label>
-        <label>Weight <output data-out="weight"></output><input data-control="weight" type="range" min="0.4" max="4" step="0.05" /></label>
-        <label>Spring back <output data-out="springBack"></output><input data-control="springBack" type="range" min="0.05" max="0.8" step="0.01" /></label>
-        <label>Wind <output data-out="wind"></output><input data-control="wind" type="range" min="0" max="1.5" step="0.01" /></label>
-        <label>White border <output data-out="border"></output><input data-control="border" type="range" min="0" max="0.16" step="0.005" /></label>
-        <label>Mesh detail <select data-control="meshDetail"><option value="draft">Draft</option><option value="standard">Standard</option><option value="fine">Fine</option></select></label>
-      </section>
-
-      <section class="control-section">
-        <h2>Lighting</h2>
-        <div class="segmented" data-preset-group="lighting">
-          <button type="button" data-preset="studio">Studio</button><button type="button" data-preset="golden">Golden</button><button type="button" data-preset="overcast">Overcast</button><button type="button" data-preset="dramatic">Dramatic</button>
-        </div>
-        <label>Key light <output data-out="keyLight"></output><input data-control="keyLight" type="range" min="0" max="6" step="0.05" /></label>
-        <label>Key direction <output data-out="keyDirection"></output><input data-control="keyDirection" type="range" min="-180" max="180" step="1" /></label>
-        <label>Fill light <output data-out="fill"></output><input data-control="fill" type="range" min="0" max="3" step="0.05" /></label>
-        <label>Ambient <output data-out="ambient"></output><input data-control="ambient" type="range" min="0" max="2" step="0.05" /></label>
-        <label>Exposure <output data-out="exposure"></output><input data-control="exposure" type="range" min="0.3" max="1.8" step="0.01" /></label>
-      </section>
-
-      <section class="control-section">
-        <h2>Wall & scene</h2>
-        <div class="segmented" data-preset-group="wall">
-          <button type="button" data-preset="concrete">Concrete</button><button type="button" data-preset="plaster">Plaster</button><button type="button" data-preset="flat">Flat</button>
-        </div>
-        <label>Relief depth <output data-out="relief"></output><input data-control="relief" type="range" min="0" max="5" step="0.1" /></label>
-        <label>Backdrop <input data-control="backdrop" type="color" /></label>
-        <label>Vignette <output data-out="vignette"></output><input data-control="vignette" type="range" min="0" max="0.6" step="0.01" /></label>
-        <label class="toggle-row"><span>Wire & clips</span><input data-control="hardware" type="checkbox" /></label>
-      </section>
-
-      <section class="control-section footer-actions">
-        <button id="save-config" class="secondary-button" type="button">Save preset</button>
-        <button id="clear-media" class="danger-button" type="button">Clear uploaded media</button>
-      </section>
-    </aside>
-  </main>
-  <script type="module" src="/src/main.js"></script>
-</body>
-</html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><meta name="theme-color" content="#c9beb0"/><title>Hanging Media Studio V2</title><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/></head><body>
+<main id="app"><section id="stage-shell" aria-label="Interactive hanging media preview"><canvas id="stage"></canvas><div id="scene-effects"></div><div id="loading" class="loading">Preparing V2…</div><div class="stage-badge">HANGING MEDIA / V2 CREATIVE SURFACES</div><div class="stage-hint">Drag to slide · grab fabric · click clips to release · wheel follows selected mode</div><div id="toast" class="toast"></div></section>
+<aside id="authoring-panel" aria-label="Hanging media controls"><header class="panel-header"><div><p class="eyebrow">LIVE COMPONENT / V2</p><h1>Hanging Media Studio V2</h1></div><button id="reset-all" class="icon-button" type="button">↺</button></header>
+<section class="control-section"><h2>Content</h2><div id="media-slots" class="media-slots"></div><label class="upload-button" for="media-upload">+ Add images or video</label><input id="media-upload" type="file" accept="image/*,video/*" multiple hidden/><label>Edit scope <select data-control="editScope"><option value="global">All surfaces</option><option value="item">Selected item only</option></select></label></section>
+<section class="control-section accent-section"><div class="section-title-row"><h2>Surface / Shape</h2><span id="selected-item-label" class="selected-chip">Item</span></div><label>Shape <select data-surface-control="surfaceShape"><option value="rectangle">Rectangle</option><option value="rounded">Rounded</option><option value="irregular">Irregular cloth</option><option value="poster">Poster</option><option value="flag">Flag</option><option value="banner">Banner</option><option value="long-banner">Long vertical banner</option><option value="polaroid">Polaroid-like</option><option value="torn">Torn paper</option><option value="tshirt">T-shirt</option><option value="dress">Dress</option><option value="tote">Tote bag</option><option value="pennant">Pennant</option></select></label><label>Format <select data-surface-control="surfaceAspect"><option value="auto">Auto / media</option><option value="square">1:1</option><option value="4:5">4:5</option><option value="2:3">2:3</option><option value="9:16">9:16</option><option value="4:3">4:3</option><option value="3:2">3:2</option><option value="16:9">16:9</option><option value="21:9">21:9</option></select></label><label>Shape character <output data-surface-out="shapeIntensity"></output><input data-surface-control="shapeIntensity" type="range" min="0" max="1" step="0.01"/></label><label class="toggle-row"><span>Backing / support</span><input data-surface-control="backing" type="checkbox"/></label><label>Backing type <select data-surface-control="backingType"><option value="paper">Paper</option><option value="card">Card</option><option value="canvas">Canvas</option><option value="dark">Dark board</option><option value="transparent">Transparent</option></select></label><label>Thickness <output data-surface-out="thickness"></output><input data-surface-control="thickness" type="range" min="0" max="0.12" step="0.005"/></label><label class="toggle-row"><span>Double sided</span><input data-surface-control="doubleSided" type="checkbox"/></label></section>
+<section class="control-section"><h2>Carousel / Camera</h2><label>Photos in view <output data-out="inView"></output><input data-control="inView" type="range" min="1" max="6" step="1"/></label><label>Photo gap <output data-out="gap"></output><input data-control="gap" type="range" min="0.25" max="1.8" step="0.01"/></label><label>Auto drift <output data-out="autoDrift"></output><input data-control="autoDrift" type="range" min="0" max="0.08" step="0.001"/></label><label>Scroll response <output data-out="scrollResponse"></output><input data-control="scrollResponse" type="range" min="0.1" max="1.6" step="0.01"/></label><label>Glide <output data-out="glide"></output><input data-control="glide" type="range" min="0.02" max="0.35" step="0.01"/></label><label>Slide sway <output data-out="slideSway"></output><input data-control="slideSway" type="range" min="0" max="1" step="0.01"/></label><label>Wall parallax <output data-out="parallax"></output><input data-control="parallax" type="range" min="0" max="0.2" step="0.005"/></label><label>Wheel behavior <select data-control="wheelBehavior"><option value="slide">Slide</option><option value="zoom">Zoom</option></select></label><label class="toggle-row"><span>Drag to slide</span><input data-control="dragToSlide" type="checkbox"/></label></section>
+<section class="control-section"><h2>Fabric / Physics</h2><label>Clips per surface <select data-control="clips"><option>1</option><option>2</option><option>3</option></select></label><label class="toggle-row"><span>Click clips to release</span><input data-control="clipRelease" type="checkbox"/></label><button id="reset-dropped" class="secondary-button" type="button">Rehang all dropped surfaces</button><label>Stiffness <output data-out="stiffness"></output><input data-control="stiffness" type="range" min="0.45" max="1" step="0.01"/></label><label>Weight <output data-out="weight"></output><input data-control="weight" type="range" min="0.4" max="4" step="0.05"/></label><label>Spring back <output data-out="springBack"></output><input data-control="springBack" type="range" min="0.05" max="0.8" step="0.01"/></label><label>Wind <output data-out="wind"></output><input data-control="wind" type="range" min="0" max="1.5" step="0.01"/></label><label>Thread relief <output data-out="threadRelief"></output><input data-control="threadRelief" type="range" min="0" max="1" step="0.01"/></label><label>Thread scale <output data-out="threadScale"></output><input data-control="threadScale" type="range" min="0.25" max="3" step="0.05"/></label><label>Sheen <output data-out="sheen"></output><input data-control="sheen" type="range" min="0" max="1" step="0.01"/></label><label>Print gloss <output data-out="printGloss"></output><input data-control="printGloss" type="range" min="0" max="1" step="0.01"/></label><label>White border <output data-out="border"></output><input data-control="border" type="range" min="0" max="0.16" step="0.005"/></label><label>Mesh detail <select data-control="meshDetail"><option value="draft">Draft</option><option value="standard">Standard</option><option value="fine">Fine</option></select></label></section>
+<section class="control-section"><h2>Forge chip</h2><label>On surface <select data-control="forgePhoto"><option value="0">Off</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></label><label>Size <output data-out="forgeSize"></output><input data-control="forgeSize" type="range" min="0.05" max="0.5" step="0.01"/></label><label>Beam glow <output data-out="forgeGlow"></output><input data-control="forgeGlow" type="range" min="0" max="3" step="0.05"/></label></section>
+<section class="control-section"><h2>Background / Templates</h2><div class="segmented three" data-preset-group="backgroundTemplate"><button type="button" data-preset="concrete">Concrete</button><button type="button" data-preset="plaster">Plaster</button><button type="button" data-preset="white-studio">White Studio</button><button type="button" data-preset="dark-editorial">Dark</button><button type="button" data-preset="mediterranean">Mediterranean</button><button type="button" data-preset="brick">Brick</button></div><label class="upload-button" for="background-upload">+ Upload background image / video</label><input id="background-upload" type="file" accept="image/*,video/*" hidden/><button id="clear-background" class="secondary-button" type="button">Return to template</button><label>Opacity <output data-out="backgroundOpacity"></output><input data-control="backgroundOpacity" type="range" min="0.15" max="1" step="0.01"/></label><label>Blur <output data-out="backgroundBlur"></output><input data-control="backgroundBlur" type="range" min="0" max="12" step="0.5"/></label><label>Video speed <output data-out="backgroundPlayback"></output><input data-control="backgroundPlayback" type="range" min="0.25" max="2" step="0.05"/></label></section>
+<section class="control-section"><h2>Lighting</h2><div class="segmented" data-preset-group="lighting"><button type="button" data-preset="studio">Studio</button><button type="button" data-preset="golden">Golden</button><button type="button" data-preset="overcast">Overcast</button><button type="button" data-preset="dramatic">Dramatic</button></div><label>Key light <output data-out="keyLight"></output><input data-control="keyLight" type="range" min="0" max="6" step="0.05"/></label><label>Key direction <output data-out="keyDirection"></output><input data-control="keyDirection" type="range" min="-180" max="180" step="1"/></label><label>Key height <output data-out="keyHeight"></output><input data-control="keyHeight" type="range" min="-1" max="7" step="0.1"/></label><label>Fill light <output data-out="fill"></output><input data-control="fill" type="range" min="0" max="3" step="0.05"/></label><label>Rim light <output data-out="rim"></output><input data-control="rim" type="range" min="0" max="4" step="0.05"/></label><label>Ambient <output data-out="ambient"></output><input data-control="ambient" type="range" min="0" max="2" step="0.05"/></label><label>Exposure <output data-out="exposure"></output><input data-control="exposure" type="range" min="0.3" max="1.8" step="0.01"/></label></section>
+<section class="control-section"><h2>Shadows</h2><label class="toggle-row"><span>Shadows</span><input data-control="shadowEnabled" type="checkbox"/></label><label>Quality <select data-control="shadowQuality"><option value="off">Off</option><option value="balanced">Balanced</option><option value="high">High</option><option value="ultra">Ultra</option></select></label><label>Penumbra <output data-out="penumbra"></output><input data-control="penumbra" type="range" min="0" max="60" step="1"/></label><label>Shadow depth <output data-out="shadowDepth"></output><input data-control="shadowDepth" type="range" min="0" max="0.5" step="0.01"/></label></section>
+<section class="control-section"><h2>Wall / Material</h2><label>Relief depth <output data-out="relief"></output><input data-control="relief" type="range" min="0" max="5" step="0.1"/></label><label>Texture scale <output data-out="textureScale"></output><input data-control="textureScale" type="range" min="0.5" max="5" step="0.1"/></label><label>Shine <output data-out="wallShine"></output><input data-control="wallShine" type="range" min="0" max="1" step="0.01"/></label><label>Crevice shadows <output data-out="crevice"></output><input data-control="crevice" type="range" min="0" max="1.5" step="0.01"/></label><label>Backdrop <input data-control="backdrop" type="color"/></label></section>
+<section class="control-section"><h2>Scene / Hardware</h2><label class="toggle-row"><span>Wire & clips</span><input data-control="hardware" type="checkbox"/></label><label>Hardware <select data-control="hardwareStyle"><option value="wood">Wood</option><option value="brass">Brass</option><option value="minimal">Minimal</option></select></label><label class="toggle-row"><span>Loading intro</span><input data-control="loadingIntro" type="checkbox"/></label><label>Vignette <output data-out="vignette"></output><input data-control="vignette" type="range" min="0" max="0.6" step="0.01"/></label><label>Film grain <output data-out="filmGrain"></output><input data-control="filmGrain" type="range" min="0" max="0.25" step="0.01"/></label><label>Dust motes <output data-out="dustMotes"></output><input data-control="dustMotes" type="range" min="0" max="1" step="0.01"/></label></section>
+<section class="control-section"><h2>Audio</h2><div id="audio-status" class="asset-status">No audio loaded</div><label class="upload-button" for="audio-upload">+ Upload audio</label><input id="audio-upload" type="file" accept="audio/*" hidden/><div class="button-row"><button id="audio-toggle" class="secondary-button" type="button">Play audio</button><button id="clear-audio" class="secondary-button" type="button">Clear</button></div><label>Volume <output data-out="audioVolume"></output><input data-control="audioVolume" type="range" min="0" max="1" step="0.01"/></label><label class="toggle-row"><span>Loop</span><input data-control="audioLoop" type="checkbox"/></label></section>
+<section class="control-section footer-actions"><button id="save-config" class="secondary-button" type="button">Save V2 preset</button><button id="clear-media" class="danger-button" type="button">Clear uploaded media</button></section></aside></main><script type="module" src="/src/main.js"></script></body></html>
