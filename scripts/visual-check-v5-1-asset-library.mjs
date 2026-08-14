@@ -11,7 +11,10 @@ const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:1500,height:1000}});const consoleErrors=[],pageErrors=[];page.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text())});page.on('pageerror',e=>pageErrors.push(String(e)));
 await page.goto('http://127.0.0.1:4174/',{waitUntil:'networkidle'});
 await page.waitForSelector('#v51al-upload',{state:'attached'});
-await page.waitForFunction(()=>window.__V51_ASSET_LIBRARY__?.ready&&typeof window.HangingMediaV51AssetLibrary?.addInstance==='function',null,{timeout:8000});
+await page.waitForTimeout(1800);
+const bootDiag=await page.evaluate(()=>({library:!!window.HangingMediaV51AssetLibrary,ready:window.__V51_ASSET_LIBRARY__?.ready||false,character:!!window.HangingMediaV51Character,getSceneContext:typeof window.HangingMediaV51Character?.getSceneContext,panel:!!document.querySelector('#v5-1-asset-library'),status:document.querySelector('#v51al-status')?.textContent||'',charCanvas:!!document.querySelector('#v5-1-character-canvas')}));
+await fs.writeFile('artifacts/asset-library-boot-diagnostic.json',JSON.stringify({bootDiag,consoleErrors,pageErrors},null,2));
+if(!bootDiag.ready)throw new Error(`Asset Library boot failed: ${JSON.stringify({bootDiag,consoleErrors,pageErrors})}`);
 await page.setInputFiles('#v51al-upload',['artifacts/library-red.zip','artifacts/library-blue.zip']);
 await page.waitForFunction(()=>window.__V51_ASSET_LIBRARY__?.assets?.length===2,null,{timeout:8000});
 const imported=await page.evaluate(()=>window.__V51_ASSET_LIBRARY__.assets);
@@ -19,7 +22,6 @@ if(imported.length!==2)throw new Error(`Expected 2 assets, got ${imported.length
 await page.evaluate(async()=>{const api=window.HangingMediaV51AssetLibrary,assets=api.getAssets();await api.addInstance(assets[0].id);await api.addInstance(assets[1].id);const first=api.getInstances()[0];await api.duplicateInstance(first.id)});
 await page.waitForFunction(()=>window.__V51_ASSET_LIBRARY__?.instances?.length===3,null,{timeout:5000});
 await page.click('.v51al-instance');
-await page.fill('#v51al-scale','1.15').catch(()=>{});
 await page.evaluate(()=>{const el=document.querySelector('#v51al-scale');el.value='1.15';el.dispatchEvent(new Event('input',{bubbles:true}))});
 await page.waitForTimeout(350);
 const beforeReload=await page.evaluate(()=>({assets:window.__V51_ASSET_LIBRARY__.assets,instances:window.__V51_ASSET_LIBRARY__.instances,status:document.querySelector('#v51al-status')?.textContent||''}));
@@ -28,5 +30,5 @@ await page.waitForFunction(()=>window.__V51_ASSET_LIBRARY__?.ready&&window.__V51
 const restored=await page.evaluate(()=>({assets:window.__V51_ASSET_LIBRARY__.assets,instances:window.__V51_ASSET_LIBRARY__.instances,status:document.querySelector('#v51al-status')?.textContent||''}));
 if(restored.assets.length!==2||restored.instances.length!==3)throw new Error(`Restore mismatch: ${JSON.stringify(restored)}`);
 await page.screenshot({path:'artifacts/hanging-media-v5-1-asset-library.png',fullPage:true});
-const report={imported,beforeReload,restored,consoleErrors,pageErrors};await fs.writeFile('artifacts/runtime-report-v5-1-asset-library.json',JSON.stringify(report,null,2));
+const report={bootDiag,imported,beforeReload,restored,consoleErrors,pageErrors};await fs.writeFile('artifacts/runtime-report-v5-1-asset-library.json',JSON.stringify(report,null,2));
 if(pageErrors.length)throw new Error(`Page errors: ${pageErrors.join(' | ')}`);const relevant=consoleErrors.filter(x=>!x.includes('favicon'));if(relevant.length)throw new Error(`Console errors: ${relevant.join(' | ')}`);console.log(JSON.stringify(report,null,2));await browser.close();
