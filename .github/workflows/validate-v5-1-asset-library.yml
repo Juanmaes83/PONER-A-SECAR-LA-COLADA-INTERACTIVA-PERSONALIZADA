@@ -4,12 +4,13 @@ on:
   push:
     branches:
       - agent/hanging-media-studio-v5-1-asset-library
+      - fix/v5-1-phase1-core-3d
   workflow_dispatch:
 
 jobs:
   build-and-browser-check:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -21,9 +22,13 @@ jobs:
         run: npm run build
       - name: Syntax checks
         run: |
+          node --check src/media-runtime-v2.js
+          node --check src/scene-asset-runtime.js
           node --check src/v5-1-asset-library-v2.js
+          node --check src/v5-1-phase1-hardening.js
           node --check src/v5-1-external-assets.js
           node --check src/v5-1-character-library.js
+          node --check scripts/visual-check-v5-1-phase1.mjs
           node --check scripts/visual-check-v5-1-asset-library.mjs
           node --check scripts/visual-check-v5-1-external.mjs
           node --check scripts/visual-check-v5-1.mjs
@@ -38,6 +43,8 @@ jobs:
           done
           cat /tmp/v5-1-library.log
           exit 1
+      - name: Phase 1 real product regression QA
+        run: node scripts/visual-check-v5-1-phase1.mjs
       - name: Multi-asset library browser QA
         run: node scripts/visual-check-v5-1-asset-library.mjs
       - name: Existing external package QA
@@ -48,6 +55,6 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: v5-1-asset-library-qa
+          name: v5-1-phase1-qa
           path: artifacts
           if-no-files-found: warn
