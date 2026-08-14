@@ -24,7 +24,7 @@ const consoleErrors=[];const pageErrors=[];
 page.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text())});
 page.on('pageerror',e=>pageErrors.push(String(e)));
 await page.goto('http://127.0.0.1:4174/',{waitUntil:'networkidle'});
-await page.waitForSelector('#v5-1-glb');
+await page.waitForSelector('#v5-1-glb',{state:'attached'});
 await page.waitForFunction(()=>typeof window.HangingMediaV51External?.loadFiles==='function'&&typeof window.HangingMediaV51Character?.mountExternal==='function');
 
 await page.setInputFiles('#v5-1-glb','artifacts/fixture-gltf.zip');
