@@ -7,7 +7,7 @@ export default defineConfig({
     transformIndexHtml: {
       order: 'pre',
       handler(html) {
-        return html.replace('</body>', '<script type="module" src="/src/v3-studio.js"></script><script type="module" src="/src/v4-character.js"></script></body>');
+        return html.replace('</body>', '<script type="module" src="/src/v3-studio.js"></script><script type="module" src="/src/v4-character.js"></script><script type="module" src="/src/v4-character-kinematics.js"></script></body>');
       }
     }
   }],
