@@ -3,11 +3,11 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   base: './',
   plugins: [{
-    name: 'hanging-media-v3-entry',
+    name: 'hanging-media-v4-entry',
     transformIndexHtml: {
       order: 'pre',
       handler(html) {
-        return html.replace('</body>', '<script type="module" src="/src/v3-studio.js"></script></body>');
+        return html.replace('</body>', '<script type="module" src="/src/v3-studio.js"></script><script type="module" src="/src/v4-character.js"></script></body>');
       }
     }
   }],
