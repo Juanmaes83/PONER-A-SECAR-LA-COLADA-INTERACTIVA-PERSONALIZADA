@@ -21,7 +21,7 @@ jobs:
         run: npm run build
       - name: Syntax checks
         run: |
-          node --check src/v5-1-asset-library.js
+          node --check src/v5-1-asset-library-v2.js
           node --check src/v5-1-external-assets.js
           node --check src/v5-1-character-library.js
           node --check scripts/visual-check-v5-1-asset-library.mjs
