@@ -1,4 +1,4 @@
-# V5 final-polish clean publish
+# V5.1 character-library publish
 name: Deploy Hanging Media Versions to GitHub Pages
 
 on:
@@ -17,7 +17,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 45
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -52,11 +52,17 @@ jobs:
           ref: agent/hanging-media-studio-v4-1-1
           path: v4-1-1-src
 
-      - name: Checkout V5 3D character proof
+      - name: Checkout immutable V5
         uses: actions/checkout@v4
         with:
           ref: agent/hanging-media-studio-v5
           path: v5-src
+
+      - name: Checkout V5.1 character library
+        uses: actions/checkout@v4
+        with:
+          ref: agent/hanging-media-studio-v5-1
+          path: v5-1-src
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -106,34 +112,40 @@ jobs:
         run: |
           npm install
           npm run build
-          node --check src/v3-studio.js
-          node --check src/v4-character.js
-          node --check src/v4-character-kinematics.js
           node --check src/v5-character-3d.js
-          node --check scripts/visual-check-v5.mjs
 
-      - name: Install Chromium for V5 QA
-        working-directory: v5-src
+      - name: Build V5.1
+        working-directory: v5-1-src
+        run: |
+          npm install
+          npm run build
+          node --check src/v3-studio.js
+          node --check src/v5-character-3d.js
+          node --check src/v5-1-character-library.js
+          node --check scripts/visual-check-v5-1.mjs
+
+      - name: Install Chromium for V5.1 QA
+        working-directory: v5-1-src
         run: npx playwright install --with-deps chromium
 
-      - name: Start V5 production preview
-        working-directory: v5-src
+      - name: Start V5.1 production preview
+        working-directory: v5-1-src
         run: |
-          npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/hanging-media-v5.log 2>&1 &
+          npm run preview -- --host 127.0.0.1 --port 4174 > /tmp/hanging-media-v5-1.log 2>&1 &
           for i in {1..30}; do
-            if curl -fsS http://127.0.0.1:4173/ > /dev/null; then exit 0; fi
+            if curl -fsS http://127.0.0.1:4174/ > /dev/null; then exit 0; fi
             sleep 1
           done
-          cat /tmp/hanging-media-v5.log
+          cat /tmp/hanging-media-v5-1.log
           exit 1
 
-      - name: V5 browser production QA
-        working-directory: v5-src
-        run: node scripts/visual-check-v5.mjs
+      - name: V5.1 browser production QA
+        working-directory: v5-1-src
+        run: node scripts/visual-check-v5-1.mjs
 
       - name: Compose versioned Pages site
         run: |
-          mkdir -p site/v1 site/v2 site/v3 site/v4 site/v4-1-1 site/v5
+          mkdir -p site/v1 site/v2 site/v3 site/v4 site/v4-1-1 site/v5 site/v5-1
           cp -a v1-src/dist/. site/
           cp -a v1-src/dist/. site/v1/
           cp -a v2-src/dist/. site/v2/
@@ -141,13 +153,14 @@ jobs:
           cp -a v4-src/dist/. site/v4/
           cp -a v4-1-1-src/dist/. site/v4-1-1/
           cp -a v5-src/dist/. site/v5/
+          cp -a v5-1-src/dist/. site/v5-1/
 
-      - name: Upload V5 QA evidence
+      - name: Upload V5.1 QA evidence
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: hanging-media-studio-v5-validation
-          path: v5-src/artifacts
+          name: hanging-media-studio-v5-1-validation
+          path: v5-1-src/artifacts
           if-no-files-found: warn
 
       - name: Upload Pages artifact
