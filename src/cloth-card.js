@@ -6,12 +6,29 @@ const DETAIL = {
   fine: [28, 38]
 };
 
+let sharedSoftShadowTexture = null;
+
+function getSoftShadowTexture() {
+  if (sharedSoftShadowTexture) return sharedSoftShadowTexture;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, 256, 256);
+  ctx.shadowColor = 'rgba(0,0,0,.72)';
+  ctx.shadowBlur = 30;
+  ctx.fillStyle = 'rgba(0,0,0,.5)';
+  ctx.fillRect(34, 30, 188, 196);
+  sharedSoftShadowTexture = new THREE.CanvasTexture(canvas);
+  sharedSoftShadowTexture.colorSpace = THREE.SRGBColorSpace;
+  return sharedSoftShadowTexture;
+}
+
 export class ClothCard {
   constructor(media, options = {}) {
     this.media = media;
-    this.width = options.width ?? 2.25;
+    this.width = options.width ?? 2.05;
     const aspect = media.width && media.height ? media.height / media.width : 1.25;
-    this.height = THREE.MathUtils.clamp(this.width * aspect, 2.2, 3.2);
+    this.height = THREE.MathUtils.clamp(this.width * aspect, 2.08, 3.0);
     this.detail = options.meshDetail ?? 'standard';
     this.stiffness = options.stiffness ?? 0.92;
     this.weight = options.weight ?? 2.1;
@@ -32,6 +49,20 @@ export class ClothCard {
     this.group = new THREE.Group();
     this.group.userData.clothCard = this;
 
+    this.softShadow = new THREE.Mesh(
+      new THREE.PlaneGeometry(this.width + 0.38, this.height + 0.42),
+      new THREE.MeshBasicMaterial({
+        map: getSoftShadowTexture(),
+        transparent: true,
+        opacity: 0.24,
+        depthWrite: false,
+        side: THREE.DoubleSide
+      })
+    );
+    this.softShadow.position.set(0.08, -this.height / 2 - 0.08, -0.12);
+    this.softShadow.renderOrder = -2;
+    this.group.add(this.softShadow);
+
     this.geometry = new THREE.PlaneGeometry(this.width, this.height, cols, rows);
     this.geometry.translate(0, -this.height / 2, 0);
 
@@ -43,8 +74,8 @@ export class ClothCard {
       transparent: false
     });
     this.mesh = new THREE.Mesh(this.geometry, this.material);
-    this.mesh.castShadow = true;
-    this.mesh.receiveShadow = true;
+    this.mesh.castShadow = false;
+    this.mesh.receiveShadow = false;
     this.mesh.userData.clothCard = this;
     this.group.add(this.mesh);
 
@@ -53,7 +84,8 @@ export class ClothCard {
       new THREE.MeshStandardMaterial({ color: 0xf6f2eb, roughness: 0.9, side: THREE.DoubleSide })
     );
     this.borderMesh.position.set(0, -this.height / 2, -0.018);
-    this.borderMesh.castShadow = true;
+    this.borderMesh.castShadow = false;
+    this.borderMesh.receiveShadow = false;
     this.group.add(this.borderMesh);
 
     this.p = new Float32Array(this.count * 3);
@@ -201,5 +233,7 @@ export class ClothCard {
     this.material.dispose();
     this.borderMesh.geometry.dispose();
     this.borderMesh.material.dispose();
+    this.softShadow.geometry.dispose();
+    this.softShadow.material.dispose();
   }
 }
