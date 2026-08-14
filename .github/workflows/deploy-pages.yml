@@ -122,7 +122,9 @@ jobs:
           node --check src/v3-studio.js
           node --check src/v5-character-3d.js
           node --check src/v5-1-character-library.js
+          node --check src/v5-1-external-assets.js
           node --check scripts/visual-check-v5-1.mjs
+          node --check scripts/visual-check-v5-1-external.mjs
 
       - name: Install Chromium for V5.1 QA
         working-directory: v5-1-src
@@ -138,6 +140,10 @@ jobs:
           done
           cat /tmp/hanging-media-v5-1.log
           exit 1
+
+      - name: V5.1 external 3D asset production QA
+        working-directory: v5-1-src
+        run: node scripts/visual-check-v5-1-external.mjs
 
       - name: V5.1 browser production QA
         working-directory: v5-1-src
