@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-browser-check:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,9 +25,28 @@ jobs:
       - name: Production build
         run: npm run build
 
-      - name: Upload production artifact
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Start production preview
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/hanging-media-vite.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/hanging-media-vite.log
+          exit 1
+
+      - name: Browser runtime verification
+        run: npm run verify:browser
+
+      - name: Upload validation artifacts
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: hanging-media-studio-v1-dist
-          path: dist
+          name: hanging-media-studio-v1-validation
+          path: |
+            dist
+            artifacts
           if-no-files-found: error
