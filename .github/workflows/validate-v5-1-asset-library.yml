@@ -28,6 +28,7 @@ jobs:
           node --check src/v5-1-phase1-hardening.js
           node --check src/v5-1-external-assets.js
           node --check src/v5-1-character-library.js
+          node --check scripts/diagnose-v5-1-phase1.mjs
           node --check scripts/visual-check-v5-1-phase1.mjs
           node --check scripts/visual-check-v5-1-asset-library.mjs
           node --check scripts/visual-check-v5-1-external.mjs
@@ -43,6 +44,8 @@ jobs:
           done
           cat /tmp/v5-1-library.log
           exit 1
+      - name: Diagnose Phase 1 bootstrap
+        run: node scripts/diagnose-v5-1-phase1.mjs
       - name: Phase 1 real product regression QA
         run: node scripts/visual-check-v5-1-phase1.mjs
       - name: Multi-asset library browser QA
