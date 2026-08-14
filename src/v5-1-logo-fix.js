@@ -14,18 +14,29 @@ function mount(){
   if(!legacy)return setTimeout(mount,60);
   const label=document.querySelector('label[for="v5-1-logo"]');
   if(!label)return setTimeout(mount,60);
+  const input=document.createElement('input');
+  input.id='v5-1-logo-direct';
+  input.type='file';
+  input.accept='image/*,.svg';
+  input.hidden=true;
+  input.addEventListener('change',async e=>{
+    const file=e.target.files?.[0];
+    if(!file)return;
+    syncBrandingControls();
+    const canonical=$('#v3-logo');
+    if(typeof canonical?.onchange==='function'){
+      await canonical.onchange({target:{files:[file],value:''}});
+    }
+    e.target.value='';
+  });
   const button=document.createElement('button');
   button.id='v5-1-logo-trigger';
   button.type='button';
   button.className='secondary-button';
   button.textContent='+ Upload logo';
-  button.addEventListener('click',()=>{
-    syncBrandingControls();
-    const canonical=$('#v3-logo');
-    if(canonical)canonical.click();
-  });
+  button.addEventListener('click',()=>input.click());
   label.replaceWith(button);
-  legacy.remove();
+  legacy.replaceWith(input);
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
