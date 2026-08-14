@@ -4,14 +4,11 @@ export default defineConfig({
   base: './',
   plugins: [{
     name: 'hanging-media-v3-entry',
-    transformIndexHtml() {
-      return {
-        tags: [{
-          tag: 'script',
-          attrs: { type: 'module', src: './src/v3-studio.js' },
-          injectTo: 'body'
-        }]
-      };
+    transformIndexHtml: {
+      order: 'pre',
+      handler(html) {
+        return html.replace('</body>', '<script type="module" src="/src/v3-studio.js"></script></body>');
+      }
     }
   }],
   build: {
