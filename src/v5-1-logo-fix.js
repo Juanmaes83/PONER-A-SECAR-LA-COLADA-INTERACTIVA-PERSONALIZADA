@@ -13,8 +13,23 @@ function mount(){
   const legacy=$('#v5-1-logo');
   if(!legacy)return setTimeout(mount,60);
   const label=document.querySelector('label[for="v5-1-logo"]');
-  const canonical=$('#v3-logo');
-  if(!label||!canonical||typeof canonical.onchange!=='function')return setTimeout(mount,60);
+  if(!label||!window.HangingMediaV3?.addImageLayer)return setTimeout(mount,60);
+
+  legacy.accept='image/png,image/jpeg,image/webp,image/gif,image/svg+xml,.svg';
+  legacy.onchange=async e=>{
+    const file=e.target.files?.[0];
+    if(!file)return;
+    syncBrandingControls();
+    try{
+      await window.HangingMediaV3.addImageLayer(file,'logo');
+      const status=$('#v3-status');
+      if(status)status.textContent=`Logo / image added · ${file.name}`;
+    }catch(err){
+      console.error('V5.1 logo/image upload failed',err);
+    }finally{
+      e.target.value='';
+    }
+  };
 
   const button=document.createElement('button');
   button.id='v5-1-logo-trigger';
@@ -23,11 +38,10 @@ function mount(){
   button.textContent='+ Upload logo / image';
   button.addEventListener('click',()=>{
     syncBrandingControls();
-    canonical.click();
+    legacy.click();
   });
 
   label.replaceWith(button);
-  legacy.remove();
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
