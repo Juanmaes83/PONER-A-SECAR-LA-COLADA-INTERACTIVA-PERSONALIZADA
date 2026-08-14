@@ -16,7 +16,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -39,11 +39,17 @@ jobs:
           ref: agent/hanging-media-studio-v3
           path: v3-src
 
-      - name: Checkout V4
+      - name: Checkout immutable V4
         uses: actions/checkout@v4
         with:
           ref: agent/hanging-media-studio-v4
           path: v4-src
+
+      - name: Checkout V4.1.1 realism polish
+        uses: actions/checkout@v4
+        with:
+          ref: agent/hanging-media-studio-v4-1-1
+          path: v4-1-1-src
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -79,41 +85,53 @@ jobs:
           npm run build
           node --check src/v3-studio.js
           node --check src/v4-character.js
+          node --check src/v4-character-kinematics.js
 
-      - name: Install Chromium for V4 QA
-        working-directory: v4-src
+      - name: Build V4.1.1
+        working-directory: v4-1-1-src
+        run: |
+          npm install
+          npm run build
+          node --check src/v3-studio.js
+          node --check src/v4-character.js
+          node --check src/v4-character-kinematics.js
+          node --check scripts/visual-check-v4.mjs
+
+      - name: Install Chromium for V4.1.1 QA
+        working-directory: v4-1-1-src
         run: npx playwright install --with-deps chromium
 
-      - name: Start V4 production preview
-        working-directory: v4-src
+      - name: Start V4.1.1 production preview
+        working-directory: v4-1-1-src
         run: |
-          npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/hanging-media-v4.log 2>&1 &
+          npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/hanging-media-v4-1-1.log 2>&1 &
           for i in {1..30}; do
             if curl -fsS http://127.0.0.1:4173/ > /dev/null; then exit 0; fi
             sleep 1
           done
-          cat /tmp/hanging-media-v4.log
+          cat /tmp/hanging-media-v4-1-1.log
           exit 1
 
-      - name: V4 browser production QA
-        working-directory: v4-src
+      - name: V4.1.1 browser production QA
+        working-directory: v4-1-1-src
         run: node scripts/visual-check-v4.mjs
 
       - name: Compose versioned Pages site
         run: |
-          mkdir -p site/v1 site/v2 site/v3 site/v4
+          mkdir -p site/v1 site/v2 site/v3 site/v4 site/v4-1-1
           cp -a v1-src/dist/. site/
           cp -a v1-src/dist/. site/v1/
           cp -a v2-src/dist/. site/v2/
           cp -a v3-src/dist/. site/v3/
           cp -a v4-src/dist/. site/v4/
+          cp -a v4-1-1-src/dist/. site/v4-1-1/
 
-      - name: Upload V4 QA evidence
+      - name: Upload V4.1.1 QA evidence
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: hanging-media-studio-v4-validation
-          path: v4-src/artifacts
+          name: hanging-media-studio-v4-1-1-validation
+          path: v4-1-1-src/artifacts
           if-no-files-found: warn
 
       - name: Upload Pages artifact
