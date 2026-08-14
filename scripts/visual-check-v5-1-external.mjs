@@ -29,8 +29,8 @@ await page.waitForFunction(()=>typeof window.HangingMediaV51External?.loadFiles=
 
 await page.setInputFiles('#v5-1-glb','artifacts/fixture-gltf.zip');
 await page.waitForFunction(()=>window.HangingMediaV51External?.lastReport?.meshes>=1,null,{timeout:5000});
+await page.waitForFunction(()=>document.querySelector('#v5-1-glb-status')?.textContent?.includes('saved locally'),null,{timeout:5000});
 const gltfReport=await page.evaluate(()=>({report:window.HangingMediaV51External.lastReport,status:document.querySelector('#v5-1-glb-status')?.textContent||'',template:document.querySelector('#v5-1-template')?.value}));
-if(!gltfReport.status.includes('saved locally'))throw new Error(`glTF package did not persist: ${JSON.stringify(gltfReport)}`);
 if(gltfReport.template!=='custom')throw new Error(`glTF package did not activate custom mode: ${JSON.stringify(gltfReport)}`);
 
 await page.reload({waitUntil:'networkidle'});
