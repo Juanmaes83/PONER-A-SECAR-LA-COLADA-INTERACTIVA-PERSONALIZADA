@@ -13,33 +13,21 @@ function mount(){
   const legacy=$('#v5-1-logo');
   if(!legacy)return setTimeout(mount,60);
   const label=document.querySelector('label[for="v5-1-logo"]');
-  if(!label)return setTimeout(mount,60);
-  const input=document.createElement('input');
-  input.id='v5-1-logo-direct';
-  input.type='file';
-  input.accept='image/*,.svg';
-  input.hidden=true;
-  input.addEventListener('change',async e=>{
-    const file=e.target.files?.[0];
-    if(!file)return;
-    syncBrandingControls();
-    const canonical=$('#v3-logo');
-    if(canonical&&typeof canonical.onchange==='function'){
-      const dt=new DataTransfer();
-      dt.items.add(file);
-      canonical.files=dt.files;
-      await canonical.onchange({target:canonical,currentTarget:canonical,type:'change'});
-    }
-    e.target.value='';
-  });
+  const canonical=$('#v3-logo');
+  if(!label||!canonical||typeof canonical.onchange!=='function')return setTimeout(mount,60);
+
   const button=document.createElement('button');
   button.id='v5-1-logo-trigger';
   button.type='button';
   button.className='secondary-button';
-  button.textContent='+ Upload logo';
-  button.addEventListener('click',()=>input.click());
+  button.textContent='+ Upload logo / image';
+  button.addEventListener('click',()=>{
+    syncBrandingControls();
+    canonical.click();
+  });
+
   label.replaceWith(button);
-  legacy.replaceWith(input);
+  legacy.remove();
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
