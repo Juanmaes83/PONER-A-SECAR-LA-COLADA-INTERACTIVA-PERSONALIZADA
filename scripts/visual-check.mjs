@@ -1,6 +1,8 @@
 import { chromium } from 'playwright';
 import fs from 'node:fs/promises';
 
+await fs.mkdir('artifacts', { recursive: true });
+
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
 const consoleErrors = [];
@@ -26,15 +28,16 @@ const initial = await page.evaluate(() => {
   };
 });
 
+await page.screenshot({ path: 'artifacts/hanging-media-v1-default.png', fullPage: true });
+
 await page.locator('[data-control="wind"]').evaluate((el) => { el.value = '0.9'; el.dispatchEvent(new Event('input', { bubbles: true })); });
 await page.locator('[data-preset-group="lighting"] [data-preset="dramatic"]').click();
 await page.mouse.move(430, 420);
 await page.mouse.wheel(0, 420);
 await page.waitForTimeout(1000);
+await page.screenshot({ path: 'artifacts/hanging-media-v1-stress.png', fullPage: true });
 
-await page.screenshot({ path: 'artifacts/hanging-media-v1.png', fullPage: true });
 const report = { initial, consoleErrors, pageErrors };
-await fs.mkdir('artifacts', { recursive: true });
 await fs.writeFile('artifacts/runtime-report.json', JSON.stringify(report, null, 2));
 
 if (!initial.hasWebGL) throw new Error('WebGL context unavailable');
