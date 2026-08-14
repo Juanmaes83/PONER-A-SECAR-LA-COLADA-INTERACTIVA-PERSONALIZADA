@@ -25,7 +25,7 @@ export default defineConfig({
     transformIndexHtml: {
       order: 'pre',
       handler(html) {
-        return html.replace('</body>', '<script type="module" src="/src/v3-studio.js"></script><script type="module" src="/src/v4-character.js"></script><script type="module" src="/src/v4-character-kinematics.js"></script><script type="module" src="/src/v5-character-3d.js"></script><script type="module" src="/src/v5-1-character-library.js"></script><script type="module" src="/src/v5-1-logo-fix.js"></script><script type="module" src="/src/v5-1-external-assets.js"></script><script type="module" src="/src/v5-1-asset-library.js"></script></body>');
+        return html.replace('</body>', '<script type="module" src="/src/v3-studio.js"></script><script type="module" src="/src/v4-character.js"></script><script type="module" src="/src/v4-character-kinematics.js"></script><script type="module" src="/src/v5-character-3d.js"></script><script type="module" src="/src/v5-1-character-library.js"></script><script type="module" src="/src/v5-1-logo-fix.js"></script><script type="module" src="/src/v5-1-external-assets.js"></script><script type="module" src="/src/v5-1-asset-library.js"></script><script type="module" src="/src/v5-1-asset-library-multi-import-fix.js"></script></body>');
       }
     }
   }],
