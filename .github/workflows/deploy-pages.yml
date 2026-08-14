@@ -64,6 +64,12 @@ jobs:
           ref: agent/hanging-media-studio-v5-1
           path: v5-1-src
 
+      - name: Checkout isolated V5.1 Asset Library preview
+        uses: actions/checkout@v4
+        with:
+          ref: agent/hanging-media-studio-v5-1-asset-library
+          path: v5-1-asset-library-src
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -126,6 +132,14 @@ jobs:
           node --check scripts/visual-check-v5-1.mjs
           node --check scripts/visual-check-v5-1-external.mjs
 
+      - name: Build isolated V5.1 Asset Library preview
+        working-directory: v5-1-asset-library-src
+        run: |
+          npm install
+          npm run build
+          node --check src/v5-1-asset-library-v2.js
+          node --check scripts/visual-check-v5-1-asset-library.mjs
+
       - name: Install Chromium for V5.1 QA
         working-directory: v5-1-src
         run: npx playwright install --with-deps chromium
@@ -151,7 +165,7 @@ jobs:
 
       - name: Compose versioned Pages site
         run: |
-          mkdir -p site/v1 site/v2 site/v3 site/v4 site/v4-1-1 site/v5 site/v5-1
+          mkdir -p site/v1 site/v2 site/v3 site/v4 site/v4-1-1 site/v5 site/v5-1 site/v5-1-asset-library
           cp -a v1-src/dist/. site/
           cp -a v1-src/dist/. site/v1/
           cp -a v2-src/dist/. site/v2/
@@ -160,6 +174,7 @@ jobs:
           cp -a v4-1-1-src/dist/. site/v4-1-1/
           cp -a v5-src/dist/. site/v5/
           cp -a v5-1-src/dist/. site/v5-1/
+          cp -a v5-1-asset-library-src/dist/. site/v5-1-asset-library/
 
       - name: Upload V5.1 QA evidence
         uses: actions/upload-artifact@v4
