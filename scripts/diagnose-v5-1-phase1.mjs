@@ -1,0 +1,12 @@
+import {chromium} from 'playwright';
+const browser=await chromium.launch({headless:true});
+const page=await browser.newPage({viewport:{width:1400,height:900}});
+const consoleErrors=[],pageErrors=[];
+page.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text())});
+page.on('pageerror',e=>pageErrors.push(e.message));
+await page.goto('http://127.0.0.1:4174/',{waitUntil:'networkidle'});
+await page.waitForTimeout(3500);
+const state=await page.evaluate(()=>({phase1:window.__V51_PHASE1__||null,assetLibrary:Boolean(window.__V51_ASSET_LIBRARY__?.ready),assetApi:Boolean(window.HangingMediaV51AssetLibrary),characterApi:Boolean(window.HangingMediaV51Character?.getSceneContext),v3:Boolean(window.HangingMediaV3?.addLayer),core:Boolean(window.HangingMediaCore?.mediaRuntime&&window.HangingMediaCore?.sceneAssets),assetPanel:Boolean(document.querySelector('#v5-1-asset-library-v2')),phaseScript:[...document.scripts].some(s=>s.src.includes('v5-1-phase1-hardening'))}));
+console.log(JSON.stringify({state,consoleErrors,pageErrors},null,2));
+await browser.close();
+if(!state.phase1?.ready)throw new Error(`Phase1 bootstrap failed: ${JSON.stringify({state,consoleErrors,pageErrors})}`);
