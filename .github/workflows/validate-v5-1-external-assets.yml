@@ -1,0 +1,39 @@
+name: Validate V5.1 External 3D Assets
+
+on:
+  push:
+    branches:
+      - fix/v5-1-external-3d-assets
+  workflow_dispatch:
+
+jobs:
+  build-and-browser-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Production build
+        run: npm run build
+      - name: Syntax checks
+        run: |
+          node --check src/v5-1-external-assets.js
+          node --check src/v5-1-character-library.js
+          node --check scripts/visual-check-v5-1.mjs
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Start preview
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4174 > /tmp/v5-1-external.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4174/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/v5-1-external.log
+          exit 1
+      - name: Existing V5.1 browser regression QA
+        run: node scripts/visual-check-v5-1.mjs
