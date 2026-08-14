@@ -24,8 +24,11 @@ function mount(){
     if(!file)return;
     syncBrandingControls();
     const canonical=$('#v3-logo');
-    if(typeof canonical?.onchange==='function'){
-      await canonical.onchange({target:{files:[file],value:''}});
+    if(canonical&&typeof canonical.onchange==='function'){
+      const dt=new DataTransfer();
+      dt.items.add(file);
+      canonical.files=dt.files;
+      await canonical.onchange({target:canonical,currentTarget:canonical,type:'change'});
     }
     e.target.value='';
   });
