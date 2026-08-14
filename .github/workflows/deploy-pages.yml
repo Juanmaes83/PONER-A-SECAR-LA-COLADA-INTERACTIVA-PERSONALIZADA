@@ -1,4 +1,4 @@
-name: Deploy Hanging Media V1 to GitHub Pages
+name: Deploy Hanging Media Versions to GitHub Pages
 
 on:
   push:
@@ -20,37 +20,49 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout V1 branch
+      - name: Checkout immutable V1
         uses: actions/checkout@v4
         with:
           ref: agent/hanging-media-studio-v1
+          path: v1-src
+
+      - name: Checkout V2
+        uses: actions/checkout@v4
+        with:
+          ref: agent/hanging-media-studio-v2
+          path: v2-src
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      - name: Ensure GitHub Pages is enabled
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          if ! gh api repos/${{ github.repository }}/pages >/dev/null 2>&1; then
-            gh api --method POST repos/${{ github.repository }}/pages -f build_type=workflow
-          fi
-
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      - name: Install dependencies
-        run: npm install
+      - name: Build V1
+        working-directory: v1-src
+        run: |
+          npm install
+          npm run build
 
-      - name: Build
-        run: npm run build
+      - name: Build V2
+        working-directory: v2-src
+        run: |
+          npm install
+          npm run build
+
+      - name: Compose versioned Pages site
+        run: |
+          mkdir -p site/v1 site/v2
+          cp -a v1-src/dist/. site/
+          cp -a v1-src/dist/. site/v1/
+          cp -a v2-src/dist/. site/v2/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: site
 
       - name: Deploy to GitHub Pages
         id: deployment
