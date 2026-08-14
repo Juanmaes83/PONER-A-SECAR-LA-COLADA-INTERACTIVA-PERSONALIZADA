@@ -16,6 +16,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -26,11 +27,17 @@ jobs:
           ref: agent/hanging-media-studio-v1
           path: v1-src
 
-      - name: Checkout V2
+      - name: Checkout immutable V2
         uses: actions/checkout@v4
         with:
           ref: agent/hanging-media-studio-v2
           path: v2-src
+
+      - name: Checkout V3
+        uses: actions/checkout@v4
+        with:
+          ref: agent/hanging-media-studio-v3
+          path: v3-src
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -52,12 +59,47 @@ jobs:
           npm install
           npm run build
 
+      - name: Build V3
+        working-directory: v3-src
+        run: |
+          npm install
+          npm run build
+          node --check src/v3-studio.js
+
+      - name: Install Chromium for V3 QA
+        working-directory: v3-src
+        run: npx playwright install --with-deps chromium
+
+      - name: Start V3 production preview
+        working-directory: v3-src
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/hanging-media-v3.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/hanging-media-v3.log
+          exit 1
+
+      - name: V3 browser production QA
+        working-directory: v3-src
+        run: node scripts/visual-check-v3.mjs
+
       - name: Compose versioned Pages site
         run: |
-          mkdir -p site/v1 site/v2
+          mkdir -p site/v1 site/v2 site/v3
           cp -a v1-src/dist/. site/
           cp -a v1-src/dist/. site/v1/
           cp -a v2-src/dist/. site/v2/
+          cp -a v3-src/dist/. site/v3/
+
+      - name: Upload V3 QA evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hanging-media-studio-v3-validation
+          path: v3-src/artifacts
+          if-no-files-found: warn
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
