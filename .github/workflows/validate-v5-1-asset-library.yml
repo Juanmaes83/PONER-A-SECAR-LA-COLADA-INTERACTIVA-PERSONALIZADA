@@ -5,12 +5,13 @@ on:
     branches:
       - agent/hanging-media-studio-v5-1-asset-library
       - fix/v5-1-phase1-core-3d
+      - fix/v5-1-phase1-1-stabilization
   workflow_dispatch:
 
 jobs:
   build-and-browser-check:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,9 +27,11 @@ jobs:
           node --check src/scene-asset-runtime.js
           node --check src/v5-1-asset-library-v2.js
           node --check src/v5-1-phase1-hardening.js
+          node --check src/v5-1-phase1-1-orchestrator.js
           node --check src/v5-1-external-assets.js
           node --check src/v5-1-character-library.js
           node --check scripts/diagnose-v5-1-phase1.mjs
+          node --check scripts/visual-check-v5-1-phase1-1.mjs
           node --check scripts/visual-check-v5-1-phase1.mjs
           node --check scripts/visual-check-v5-1-asset-library.mjs
           node --check scripts/visual-check-v5-1-external.mjs
@@ -46,6 +49,8 @@ jobs:
           exit 1
       - name: Diagnose Phase 1 bootstrap
         run: node scripts/diagnose-v5-1-phase1.mjs
+      - name: Phase 1.1 full coexistence regression QA
+        run: node scripts/visual-check-v5-1-phase1-1.mjs
       - name: Phase 1 real product regression QA
         run: node scripts/visual-check-v5-1-phase1.mjs
       - name: Multi-asset library browser QA
@@ -58,6 +63,6 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: v5-1-phase1-qa
+          name: v5-1-phase1-1-qa
           path: artifacts
           if-no-files-found: warn
