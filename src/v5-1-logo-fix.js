@@ -18,35 +18,26 @@ async function addImageFile(file){
 }
 
 function mount(){
-  const legacy=$('#v5-1-logo');
+  const input=$('#v5-1-logo');
   const label=document.querySelector('label[for="v5-1-logo"]');
-  if(!legacy||!label||!window.HangingMediaV3?.addImageLayer)return setTimeout(mount,60);
+  if(!input||!label||!window.HangingMediaV3?.addImageLayer)return setTimeout(mount,60);
+  if($('#v5-1-logo-trigger'))return;
 
-  legacy.remove();
+  input.hidden=true;
+  input.accept='image/png,image/jpeg,image/webp,image/gif,image/svg+xml,.svg';
+  input.addEventListener('change',async()=>{
+    const file=input.files?.[0];
+    if(!file)return;
+    try{await addImageFile(file)}catch(err){console.error('V5.1 logo/image upload failed',err)}finally{input.value=''}
+  });
+
   const button=document.createElement('button');
   button.id='v5-1-logo-trigger';
   button.type='button';
   button.className='secondary-button';
   button.textContent='+ Upload logo / image';
-  button.addEventListener('click',()=>{
-    syncBrandingControls();
-    const picker=document.createElement('input');
-    picker.type='file';
-    picker.accept='image/png,image/jpeg,image/webp,image/gif,image/svg+xml,.svg';
-    picker.hidden=true;
-    picker.dataset.v51ImagePicker='true';
-    document.body.appendChild(picker);
-    picker.addEventListener('change',async()=>{
-      try{
-        await addImageFile(picker.files?.[0]);
-      }catch(err){
-        console.error('V5.1 logo/image upload failed',err);
-      }finally{
-        picker.remove();
-      }
-    },{once:true});
-    picker.click();
-  });
+  button.setAttribute('aria-controls','v5-1-logo');
+  button.addEventListener('click',()=>{syncBrandingControls();input.click()});
   label.replaceWith(button);
 
   window.HangingMediaV51=window.HangingMediaV51||{};
