@@ -39,6 +39,10 @@ export default defineConfig({
         code=mustReplace(code,"stage.addEventListener('pointerdown',e=>{if(stage.dataset.gizmoDragging==='true')return;","stage.addEventListener('pointerdown',e=>{if(window.HMSInteractionRouter?.blocks?.('3d'))return;if(stage.dataset.gizmoDragging==='true')return;",'3D pointer guard');
         return code;
       }
+      if (clean.endsWith('/src/v5-1-phase1-1-orchestrator.js')) {
+        code=mustReplace(code,"function observe(){const mo=new MutationObserver(()=>{enhanceCards();enhanceInstances();cleanLegacyUI();showSelection()});mo.observe($('#authoring-panel')||document.body,{childList:true,subtree:true})}","function observe(){let queued=false;const mo=new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;enhanceCards();enhanceInstances();showSelection()})});mo.observe($('#authoring-panel')||document.body,{childList:true,subtree:true})}",'observer self-trigger guard');
+        return code;
+      }
       return null;
     },
     transformIndexHtml: {
