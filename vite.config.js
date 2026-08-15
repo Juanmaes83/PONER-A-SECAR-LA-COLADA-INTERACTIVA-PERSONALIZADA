@@ -24,17 +24,17 @@ export default defineConfig({
         code=mustReplace(code,"window.addEventListener('resize',resize);boot().catch(err=>{console.error(err);showLoading(false)});","window.HangingMediaMain={getSceneContext:()=>({scene,camera,renderer,world,canvas,shell}),get cards(){return cards},get current(){return current},get target(){return target},get velocity(){return velocity},get state(){return state}};window.addEventListener('resize',resize);boot().catch(err=>{console.error(err);showLoading(false)});",'main scene exposure');
         return code;
       }
-      if (clean.endsWith('/src/v3-studio.js')) {
-        return mustReplace(code,V3_API_FROM,V3_API_TO,'V3 layer API');
-      }
+      if (clean.endsWith('/src/v3-studio.js')) return mustReplace(code,V3_API_FROM,V3_API_TO,'V3 layer API');
       if (clean.endsWith('/src/v5-1-character-library.js')) {
         code=mustReplace(code,V51_BOOT,V51_EXTERNAL_API,'V5.1 external API');
         code=mustReplace(code,"stage.addEventListener('pointerdown',e=>{dragging=true;","stage.addEventListener('pointerdown',e=>{if(window.HMSInteractionRouter?.blocks?.('character'))return;dragging=true;",'character pointerdown guard');
         code=mustReplace(code,"stage.addEventListener('pointermove',e=>{if(!dragging)return;","stage.addEventListener('pointermove',e=>{if(window.HMSInteractionRouter?.blocks?.('character'))return;if(!dragging)return;",'character pointermove guard');
         code=mustReplace(code,"stage.addEventListener('wheel',e=>{targetEffort=","stage.addEventListener('wheel',e=>{if(window.HMSInteractionRouter?.blocks?.('character'))return;targetEffort=",'character wheel guard');
+        code=mustReplace(code,"customRoot=gltf.scene;customRoot.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});","customRoot=gltf.scene;let rigNodes=0;customRoot.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}if(o.isBone||o.isSkinnedMesh)rigNodes++});if(!rigNodes&&!gltf.animations?.length){customRoot=null;throw new Error('Static 3D assets belong in My 3D Library, not Character Library')} ",'static character rejection');
         return code;
       }
       if (clean.endsWith('/src/v5-1-phase1-hardening.js')) {
+        code=mustReplace(code,"transformControls=new TransformControls(c.camera,stage);","transformControls=new TransformControls(c.camera,stage);transformControls.setSize(.62);",'proportional gizmo size');
         code=mustReplace(code,"transformControls.addEventListener('objectChange',syncBackToLibrary);","transformControls.addEventListener('objectChange',()=>updateOutline());",'single transform persistence path');
         code=mustReplace(code,"stage.addEventListener('pointerdown',e=>{if(stage.dataset.gizmoDragging==='true')return;","stage.addEventListener('pointerdown',e=>{if(window.HMSInteractionRouter?.blocks?.('3d'))return;if(stage.dataset.gizmoDragging==='true')return;",'3D pointer guard');
         return code;
@@ -44,12 +44,9 @@ export default defineConfig({
     transformIndexHtml: {
       order: 'pre',
       handler(html) {
-        return html.replace('</body>', '<script type="module" src="/src/v3-studio.js"></script><script type="module" src="/src/v5-1-character-library.js"></script><script type="module" src="/src/v5-1-logo-fix.js"></script><script type="module" src="/src/v5-1-external-assets.js"></script><script type="module" src="/src/v5-1-asset-library-v2.js"></script><script type="module" src="/src/v5-1-phase1-hardening.js"></script><script type="module" src="/src/v5-1-phase1-readiness.js"></script><script type="module" src="/src/v5-1-phase1-1-orchestrator.js"></script></body>');
+        return html.replace('</body>', '<script type="module" src="/src/v3-studio.js"></script><script type="module" src="/src/v5-1-character-library.js"></script><script type="module" src="/src/v5-1-logo-fix.js"></script><script type="module" src="/src/v5-1-external-assets.js"></script><script type="module" src="/src/v5-1-asset-library-v2.js"></script><script type="module" src="/src/v5-1-phase1-hardening.js"></script><script type="module" src="/src/v5-1-phase1-readiness.js"></script><script type="module" src="/src/v5-1-phase1-1-orchestrator.js"></script><script type="module" src="/src/v5-1-phase1-1-polish.js"></script></body>');
       }
     }
   }],
-  build: {
-    target: 'es2022',
-    sourcemap: true
-  }
+  build: {target:'es2022',sourcemap:true}
 });
